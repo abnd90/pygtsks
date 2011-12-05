@@ -74,6 +74,8 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
         self.connectActions()
         self.connectSignals()
 
+        print QIcon.themeName()
+
     def connectActions(self):
         self.actionQuit.triggered.connect(qApp.quit)
         self.actionSync.triggered.connect(self.controller.sync)
