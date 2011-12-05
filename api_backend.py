@@ -1,7 +1,7 @@
 from oauth2client.client import OAuth2WebServerFlow
 from apiclient.discovery import build
 from oauth2client.file import Storage
-from oauth2client.tools import run
+from oauth2client.tools import run as _run
 from PyQt4.QtCore import *
 
 from data_backend import Task, TaskList
@@ -15,25 +15,36 @@ FLOW = OAuth2WebServerFlow(
         user_agent='pygtsks/1.0')
 
 
-class GtaskApi():
+class GtaskApi(QObject):
+    authenticated = False
+
+    needsAuthentication = pyqtSignal(str)
+    authenticationDone = pyqtSignal()
 
     def authenticate(self):
-        try:
-            storage = Storage("tasks.dat")
-            credentials = storage.get()
+        self.authThread = QThread()
+        def run():
+            try:
+                storage = Storage("tasks.dat")
+                credentials = storage.get()
+    
+                if credentials is None or credentials.invalid == True:
+                    self.needsAuthentication.emit(\
+                            FLOW.step1_get_authorize_url("http://localhost:8080/"))
+                    credentials = _run(FLOW, storage)
+                    self.authenticationDone.emit()
 
-            if credentials is None or credentials.invalid == True:
-                #Signal auth reqd
-                FLOW.step1_get_authorize_url("http://localhost:8080/")
-                credentials = run(FLOW, storage)
-
-            http = httplib2.Http()
-            http = credentials.authorize(http)
-            self.service = build(serviceName='tasks', version='v1', http=http, \
-                            developerKey='AIzaSyApuYS1zNEc93L059nwjYdtOWQwVEbg580')
+                http = httplib2.Http()
+                http = credentials.authorize(http)
+                self.service = build(serviceName='tasks', version='v1', http=http, \
+                                developerKey='AIzaSyApuYS1zNEc93L059nwjYdtOWQwVEbg580')
+                self.authenticated = True
             
-        except httplib2.ServerNotFoundError,e:
-            print "Connection failed, could not authenticate."
+            except httplib2.ServerNotFoundError,e:
+                print "Connection failed, could not authenticate."
+
+        self.authThread.run = run
+        self.authThread.start()
 
 
     def getTaskLists(self):
@@ -47,8 +58,4 @@ class GtaskApi():
     def getTaskList(self, tlid):
         tasklist = service.tasklists().get(tasklist=tlid).execute()
         return tasklist
-
-if __name__ == '__main__':
-    g = GtaskApi()
-    print g.getTaskLists()
 

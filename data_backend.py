@@ -66,10 +66,6 @@ def getTaskList(id):
     row = c.fetchone()
     return TaskList(row[1], row[2], row[0])
 
-def taskListCount():
-    c = conn.execute("select count(*) from %s" % DB_TASKLIST_NAME)
-    return int(c.fetchone()[0])
-
 if __name__ == '__main__':
     createTables()
     insertTaskList(TaskList('TESTID', 'TESTNAME'))

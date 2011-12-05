@@ -8,6 +8,11 @@ class Controller():
     def __init__(self):
         self.taskListModel = taskmodel.TaskListModel()
         self.api = api_backend.GtaskApi()
+
+        self.connectSignals()
     
-    def sync(self):
+    def connectSignals(self):
         pass
+
+    def sync(self):
+        self.api.authenticate()

@@ -9,7 +9,7 @@ class TaskListModel(QAbstractListModel):
         self.taskLists = data_backend.getTaskLists()
 
     def rowCount(self, parent=QModelIndex()):
-        return data_backend.taskListCount() + 1
+        return len(self.taskLists) + 1
 
     def data(self, index, role = Qt.DisplayRole):
         row = index.row()
