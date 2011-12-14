@@ -61,6 +61,11 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionPreferences)
 
+        self.actionPreferences.setIcon(QIcon.fromTheme("preferences-system"))
+        self.actionNew_Task.setIcon(QIcon.fromTheme("document-new"))
+        self.actionNew_Task_List.setIcon(QIcon.fromTheme("folder-new"))
+        self.actionSync.setIcon(QIcon.fromTheme("emblem-synchronized"))
+
         self.statusLabel = QLabel("Ready")
         self.statusProgress = QProgressBar()
         self.statusBar = MainWindow.statusBar()

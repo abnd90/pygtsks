@@ -15,4 +15,8 @@ class Controller():
         pass
 
     def sync(self):
-        self.api.authenticate()
+        def cb(response):
+            #Callback after tasklist was retrived
+            tl = response
+            self.taskListModel.insert(tl)
+        self.api.getTaskLists(cb)
