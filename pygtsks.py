@@ -10,7 +10,8 @@ def main():
     mw = QMainWindow()
     ui.setupUi(mw)
     mw.show()
-
+    trayIcon = QSystemTrayIcon()
+    trayIcon.show()
     sys.exit(qapp.exec_())
 
 if __name__ == '__main__':

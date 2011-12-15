@@ -21,6 +21,9 @@ class GtaskApi(QObject):
 
     needsAuthentication = pyqtSignal(str)
     authenticationDone = pyqtSignal()
+    gotTaskLists = pyqtSignal(list)
+
+    _taskRefreshQueue = []
 
     def authenticate(self):
         # if self.authenticated == True:
@@ -55,11 +58,11 @@ class GtaskApi(QObject):
 
 
     def getTaskLists(self, callback=None):
-        if hasattr(self, "_getTaskListThread"):
-            if self._getTaskListThread.isRunning():
-                self._getTaskListThread.terminate()
+        if hasattr(self, "_getTaskListsThread"):
+            if self._getTaskListsThread.isRunning():
+                self._getTaskListsThread.terminate()
         else:
-            self._getTaskListThread = QThread()
+            self._getTaskListsThread = QThread()
 
         def run():
             if not self.authenticated:
@@ -74,19 +77,34 @@ class GtaskApi(QObject):
                     # Convert into internal data sructures
                     tl = TaskList(l['id'], l['title'])
                     tls.append(tl)
-                    
+                
+                self.gotTaskLists.emit(tls)
                 if callback:
                     callback(tls)
 
-        self._getTaskListThread.run = run
-        self._getTaskListThread.start()
+        self._getTaskListsThread.run = run
+        self._getTaskListsThread.start()
 
+    def addToRefreshQueue(self, tasklist, cb=None):
+        self._taskRefreshQueue.append(tasklist.tlid)
+        
+        if not hasattr(self, "_getSingleListThread"):
+            self._getSingleListThread = QThread()
+            
+            def run():
+                if not self.authenticated:
+                    self.authenticate()
+                
+                if self.authenticated:
+                    while len(self._taskRefreshQueue):
+                        tlid = self._taskRefreshQueue.pop()
+                        tasklist = self.service.tasks().list(tasklist=tlid).execute()
+                        if cb:
+                            cb(tasklist['items'])
 
-    def getTask(self, tid, tlid='@default'):
-        task = service.tasks().get(tasklist=tlid, task=tid).execute()
-        return task
+            self._getSingleListThread.run = run
 
-    def getTaskList(self, tlid):
-        tasklist = service.tasklists().get(tasklist=tlid).execute()
-        return tasklist
+        if not self._getSingleListThread.isRunning():
+            self._getSingleListThread.start()
+
 

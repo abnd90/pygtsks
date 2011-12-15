@@ -1,7 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-import data_backend
 from data_backend import TaskList
 from debug import debug
 
@@ -11,20 +10,22 @@ class TaskListModel(QAbstractListModel):
         self.readTaskLists()
 
     def readTaskLists(self):
-        self.taskLists = data_backend.getTaskLists()
+        self.taskLists = TaskList.getAll()
         #First row is a pseudo "ALL TASKS" row
         self.taskLists.insert(0, TaskList("", "All Tasks"))
 
-    def rowCount(self, parent=QModelIndex()):
+    def rowCount(self, parent = QModelIndex()):
         return len(self.taskLists) 
 
     def data(self, index, role = Qt.DisplayRole):
         row = index.row()
+        taskList = self.taskLists[row]
+        if role == Qt.UserRole:
+            return taskList
         if role == Qt.DisplayRole or role == Qt.EditRole:
-            taskList = self.taskLists[row]
-            return taskList.name
+            return str(taskList)
 
-    def headerData(self, selection, orientation, role = Qt.DisplayRole):
+    def headerData(self, selection, orientation, role):
         if selection == 0:
                 return "Task List"
 
@@ -40,18 +41,31 @@ class TaskListModel(QAbstractListModel):
         if index.isValid and role == Qt.EditRole:
            tl = self.taskLists[index.row()]
            tl.name = str(value.toString())
-           data_backend.updateTaskList(tl)
+           TaskList.update(tl)
            self.dataChanged.emit(index, index)
            self.readTaskLists()
            return True
         else:
            return False
 
-    def insert(self, l): 
+    def insertOrUpdate(self, l): 
         for t in l:
-            debug(0, "Inserting tasklist into DB: " + str(t))
-            data_backend.insertTaskList(t)
+            debug(0, "Inserting (or updating) tasklist into DB: " + str(t))
+            TaskList.insertOrUpdate(t)
         self.readTaskLists()
         self.dataChanged.emit(self.createIndex(0, 0), \
                 self.createIndex(self.rowCount()-1, 0))
 
+class TaskModel(QAbstractTableModel):
+
+    def taskListChanged(self, curr, prev):
+        tl = curr.data(Qt.UserRole).toPyObject()
+
+    def rowCount(self, parent):
+        return 5
+
+    def columnCount(self, parent):
+        return 2
+
+    def data(self, index, role):
+        pass
