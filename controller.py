@@ -21,7 +21,7 @@ class Controller(QObject):
 
     def sync(self):
         def cb(response):
-            #Callback after tasklist was retrived
+            #Callback after list(TaskList) was retrived
             tls = response
             self.taskListModel.insertOrUpdate(tls)
         
@@ -30,9 +30,12 @@ class Controller(QObject):
 
     def refreshTasks(self, tls):
         self.syncing.emit(True, "Refreshing tasks")
-        def callback(res):
-            for r in res:
-                debug(0, "Retrieved task: "+r['title'])
+        def callback(tlid, res):
+            # Update tasks with the internal tasklist id
+            for t in res:
+                tl = self.taskListModel.taskListForTlid(tlid)
+                t.tasklist = tl.id
+            self.taskModel.insertOrUpdate(res)
             self.syncing.emit(False, '')
 
         for tl in tls:

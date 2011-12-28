@@ -85,8 +85,8 @@ class GtaskApi(QObject):
         self._getTaskListsThread.run = run
         self._getTaskListsThread.start()
 
-    def addToRefreshQueue(self, tasklist, cb=None):
-        self._taskRefreshQueue.append(tasklist.tlid)
+    def addToRefreshQueue(self, taskList, cb=None):
+        self._taskRefreshQueue.append(taskList.tlid)
         
         if not hasattr(self, "_getSingleListThread"):
             self._getSingleListThread = QThread()
@@ -98,9 +98,14 @@ class GtaskApi(QObject):
                 if self.authenticated:
                     while len(self._taskRefreshQueue):
                         tlid = self._taskRefreshQueue.pop()
-                        tasklist = self.service.tasks().list(tasklist=tlid).execute()
+                        res = self.service.tasks().list(tasklist=tlid).execute()
+                        res = res['items']
+                        tasks = []
+                        for task in res:
+                            t = Task(title=task['title'], tid=task['id'])
+                            tasks.append(t)
                         if cb:
-                            cb(tasklist['items'])
+                            cb(tlid, tasks)
 
             self._getSingleListThread.run = run
 

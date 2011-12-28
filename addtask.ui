@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>EditDialog</class>
+ <widget class="QDialog" name="EditDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -127,6 +127,9 @@
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
+     <property name="centerButtons">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
   </layout>
@@ -136,7 +139,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>EditDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -152,7 +155,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>EditDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

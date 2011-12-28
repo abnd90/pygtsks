@@ -98,8 +98,7 @@ class TaskList():
             conn.execute("update %s set name=? where tlid=?" % (DB_TASKLIST_NAME),\
                     (tl.name, tl.tlid))
         else:
-            conn.execute("insert into %s (tlid, name) values (?, ?)"\
-                    % (DB_TASKLIST_NAME),(tl.tlid, tl.name))
+            TaskList.insert(tl)
         conn.commit()
         conn.close()
 
@@ -120,7 +119,7 @@ class Task():
     completed=''
     parent=''
 
-    def __init__(self, id, title, due, tasklist, notes='', tid=''):
+    def __init__(self, title, id=0, due='', tasklist=0, notes='', tid=''):
         self.id = id
         self.title = title
         self.due = due
@@ -140,6 +139,54 @@ class Task():
             debug(0, str(e) + ", skipping creation.")
         finally:
             conn.close()
+
+    @staticmethod
+    def insert(task):
+        conn = sqlite3.connect(DB_NAME)
+        conn.execute("insert into %s (%s,%s,%s) values (?, ?, ?)" \
+                % (DB_TASKS_NAME , 'tid', 'title','tasklist'), \
+                (task.tid, task.title, task.tasklist))
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def get(taskListId):
+        """ Returns all tasks in a tasklist. 
+        If taskListId == -1, returns tasks of all tasklists. """
+
+        conn = sqlite3.connect(DB_NAME)
+        cur = conn.cursor()
+        if taskListId == -1:
+            res = cur.execute("select * from %s" % DB_TASKS_NAME)
+        else:
+            res = cur.execute("select * from %s where tasklist=?" \
+                    % DB_TASKS_NAME, (taskListId, ))
+        tasks = []
+        for row in res:
+            task = Task(id=row[0], tid=row[2], \
+                    title=row[3], tasklist=row[1])
+            tasks.append(task)
+        cur.close()
+        conn.close()
+        return tasks
+    
+    @staticmethod
+    def insertOrUpdate(task):
+        """ Inserts or updates a tasks based on whether the google-assigned
+            ID already exists in the DB """
+
+        conn = sqlite3.connect(DB_NAME)
+        cur = conn.cursor()
+        cur.execute("select * from %s where tid=?" % DB_TASKS_NAME, (task.tid, ))
+        r = cur.fetchone()
+        if r:
+            conn.execute("update %s set title=? where tid=?" % (DB_TASKS_NAME),\
+                    (task.title, task.tid))
+        else:
+            Task.insert(task)
+        conn.commit()
+        conn.close()
+
 
 
 if __name__ == '__main__':

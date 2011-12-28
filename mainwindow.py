@@ -16,18 +16,25 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
         # Construct Sidebar
         self.listView = QListView()
         color = QPalette().color(QPalette.Window).name()
-        self.listView.setStyleSheet("QListView{background: %s;border: 0px;}" % color)
+        self.listView.setStyleSheet("""
+            QListView{ background: %s;border: 5px; margin: 9px 0px;} 
+            QListView::item{padding: 3px}""" % color)
         self.listView.setMinimumWidth(160)
         self.listView.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.listView.setModel(self.controller.taskListModel)
+        # Set default task list
         index = self.controller.taskListModel.createIndex(0,0)
         self.listView.setCurrentIndex(index)
+        self.controller.taskModel.taskListChanged(index, QModelIndex())
+        self.listView.setUniformItemSizes(True)
         
         # Construct bottom-right authorization widget
         self.authWidget = QWidget()
         vbox = QVBoxLayout()
         self.authWidget.setLayout(vbox)
-        self.authWidget.setStyleSheet("""QTextEdit{color: black; background: #FFDCDC; border:0px} .QWidget{ background: #FFDCDC;}""")
+        self.authWidget.setStyleSheet("""
+            QTextEdit{color: black; background: #FFDCDC; border:0px} 
+            .QWidget{ background: #FFDCDC;}""")
         textEdit = QTextEdit()
         textEdit.setReadOnly(True)
         textEdit.setTextInteractionFlags(Qt.LinksAccessibleByMouse 
@@ -50,6 +57,8 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
         self.treeView.setHeaderHidden(True)
         self.treeView.setRootIsDecorated(False)
         self.treeView.setUniformRowHeights(True)
+        self.treeView.setAlternatingRowColors(True)
+        self.treeView.setColumnWidth(0,35)
 
         # Create a placeholder widget encapsulating the authorization and taskview widget
         widget = QWidget()

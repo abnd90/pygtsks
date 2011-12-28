@@ -1,3 +1,5 @@
+#!/usr/bin/python2
+
 import sys
 from PyQt4.QtGui import *
 
