@@ -1,7 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-import tablewidgetui
 import addtaskui
 
 class TaskDelegate(QStyledItemDelegate):
