@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'addtask.ui'
 #
-# Created: Wed Dec 28 12:24:26 2011
+# Created: Sat Dec 31 17:25:15 2011
 #      by: PyQt4 UI code generator 4.8.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,6 +33,24 @@ class Ui_EditDialog(object):
         self.task_name.setObjectName(_fromUtf8("task_name"))
         self.horizontalLayout.addWidget(self.task_name)
         self.verticalLayout.addLayout(self.horizontalLayout)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.label_3 = QtGui.QLabel(EditDialog)
+        self.label_3.setText(QtGui.QApplication.translate("EditDialog", "Status", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.horizontalLayout_4.addWidget(self.label_3)
+        spacerItem1 = QtGui.QSpacerItem(31, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem1)
+        self.statusLabel = QtGui.QLabel(EditDialog)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.statusLabel.sizePolicy().hasHeightForWidth())
+        self.statusLabel.setSizePolicy(sizePolicy)
+        self.statusLabel.setText(QtGui.QApplication.translate("EditDialog", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
+        self.statusLabel.setObjectName(_fromUtf8("statusLabel"))
+        self.horizontalLayout_4.addWidget(self.statusLabel)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout()
@@ -41,11 +59,11 @@ class Ui_EditDialog(object):
         self.label_2.setText(QtGui.QApplication.translate("EditDialog", "Notes", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout_2.addWidget(self.label_2)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem1)
+        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem2)
         self.horizontalLayout_2.addLayout(self.verticalLayout_2)
-        spacerItem2 = QtGui.QSpacerItem(31, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem2)
+        spacerItem3 = QtGui.QSpacerItem(31, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem3)
         self.textEdit = QtGui.QTextEdit(EditDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -59,7 +77,7 @@ class Ui_EditDialog(object):
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.checkBox = QtGui.QCheckBox(EditDialog)
         self.checkBox.setEnabled(True)
-        self.checkBox.setText(QtGui.QApplication.translate("EditDialog", "Time", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBox.setText(QtGui.QApplication.translate("EditDialog", "Date/Time", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.horizontalLayout_3.addWidget(self.checkBox)
         self.dateTimeEdit = QtGui.QDateTimeEdit(EditDialog)

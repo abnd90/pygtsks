@@ -78,9 +78,10 @@ class GtaskApi(QObject):
                     tl = TaskList(l['id'], l['title'])
                     tls.append(tl)
                 
-                self.gotTaskLists.emit(tls)
                 if callback:
                     callback(tls)
+                
+                self.gotTaskLists.emit(tls)
 
         self._getTaskListsThread.run = run
         self._getTaskListsThread.start()
@@ -102,7 +103,15 @@ class GtaskApi(QObject):
                         res = res['items']
                         tasks = []
                         for task in res:
-                            t = Task(title=task['title'], tid=task['id'])
+                            t = Task(title=task['title'], tid=task['id'],\
+                                    status=task['status'])
+                            if hasattr(task,'notes'):
+                                t.notes = task['notes']
+                            if hasattr(task,'due'):
+                                t.due = task['due']
+                            if hasattr(task,'completed'):
+                                t.completed = task['completed']
+                                
                             tasks.append(t)
                         if cb:
                             cb(tlid, tasks)

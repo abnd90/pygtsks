@@ -39,7 +39,7 @@ class TaskList():
         return self.name
     
     @staticmethod
-    def createTables():
+    def createTable():
         conn = sqlite3.connect(DB_NAME)
         try:
             conn.execute(DB_TASKLIST_CREAT)
@@ -112,29 +112,31 @@ class Task():
     notes=''
     updated=''
     due='' 
-    hidden=''
+    hidden=0
     status=''
-    deleted=''
+    deleted=0
     position=''
     completed=''
     parent=''
 
-    def __init__(self, title, id=0, due='', tasklist=0, notes='', tid=''):
+    def __init__(self, title, id=0, due='', tasklist=0, notes='', tid='',\
+            completed='', status=''):
         self.id = id
         self.title = title
         self.due = due
         self.tasklist = tasklist
         self.notes = notes
         self.tid = tid
+        self.status = status
 
     def __str__(self):
-        return self.title
+        return str(self.id)+" "+self.title
     
     @staticmethod
-    def createTables():
+    def createTable():
         conn = sqlite3.connect(DB_NAME)
         try:
-            conn.execute(DB_TASK_CREAT)
+            conn.execute(DB_TASKS_CREAT)
         except sqlite3.OperationalError, e:
             debug(0, str(e) + ", skipping creation.")
         finally:
@@ -143,9 +145,13 @@ class Task():
     @staticmethod
     def insert(task):
         conn = sqlite3.connect(DB_NAME)
-        conn.execute("insert into %s (%s,%s,%s) values (?, ?, ?)" \
-                % (DB_TASKS_NAME , 'tid', 'title','tasklist'), \
-                (task.tid, task.title, task.tasklist))
+        conn.execute("insert into %s (%s,%s,%s,%s,%s,%s,%s) values \
+                (?,?,?,?,?,?,?)" \
+                % (DB_TASKS_NAME , 'tid', 'title','tasklist', 'notes',\
+                'status', 'due','completed'), \
+                (task.tid, task.title, task.tasklist, task.notes,\
+                task.status, task.due,task.completed))
+
         conn.commit()
         conn.close()
 
@@ -164,7 +170,8 @@ class Task():
         tasks = []
         for row in res:
             task = Task(id=row[0], tid=row[2], \
-                    title=row[3], tasklist=row[1])
+                    title=row[3], tasklist=row[1], notes=row[4],\
+                    due=row[6], completed=row[11], status=row[8])
             tasks.append(task)
         cur.close()
         conn.close()
@@ -189,6 +196,5 @@ class Task():
 
 
 
-if __name__ == '__main__':
-    TaskList.createTables()
-    Task.createTables()
+TaskList.createTable()
+Task.createTable()

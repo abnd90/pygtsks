@@ -13,23 +13,30 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
     def setupUi(self, MainWindow):
         super(TasksMainWindow, self).setupUi(MainWindow)
         
+        self.splitter = QSplitter()
+        
         # Construct Sidebar
-        self.listView = QListView()
-        color = QPalette().color(QPalette.Window).name()
+        self.listView = QListView(self.splitter)
+        _bgcolor = QPalette().color(QPalette.Window)
         self.listView.setStyleSheet("""
             QListView{ background: %s;border: 5px; margin: 9px 0px;} 
-            QListView::item{padding: 3px}""" % color)
+            QListView::item{padding: 3px}""" % _bgcolor.name())
         self.listView.setMinimumWidth(160)
         self.listView.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.listView.setModel(self.controller.taskListModel)
         # Set default task list
-        index = self.controller.taskListModel.createIndex(0,0)
-        self.listView.setCurrentIndex(index)
-        self.controller.taskModel.taskListChanged(index, QModelIndex())
+        self.setTaskList(0)
         self.listView.setUniformItemSizes(True)
         
+        # Create a placeholder widget encapsulating the authorization and taskview widget
+        _placeWidget = QWidget(self.splitter)
+        _placeVbox = QVBoxLayout()
+        _placeVbox.setMargin(0)
+        _placeVbox.setSpacing(0)
+        _placeWidget.setLayout(_placeVbox)
+       
         # Construct bottom-right authorization widget
-        self.authWidget = QWidget()
+        self.authWidget = QWidget(_placeWidget)
         vbox = QVBoxLayout()
         self.authWidget.setLayout(vbox)
         self.authWidget.setStyleSheet("""
@@ -49,9 +56,10 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
         self.authWidget.textEdit = textEdit
         self.authWidget.button = button
         self.authWidget.hide()
+        self.authWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         # Create a tree widget that displays the tasks
-        self.treeView = QTreeView()
+        self.treeView = QTreeView(_placeWidget)
         self.treeView.setItemDelegate(TaskDelegate(self.treeView))
         self.treeView.setModel(self.controller.taskModel)
         self.treeView.setHeaderHidden(True)
@@ -59,22 +67,15 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
         self.treeView.setUniformRowHeights(True)
         self.treeView.setAlternatingRowColors(True)
         self.treeView.setColumnWidth(0,35)
-
-        # Create a placeholder widget encapsulating the authorization and taskview widget
-        widget = QWidget()
-        vbox = QVBoxLayout()
-        vbox.setMargin(0)
-        vbox.setSpacing(0)
-        widget.setLayout(vbox)
-        vbox.addWidget(self.treeView)
-        vbox.addWidget(self.authWidget)
+        
+        _placeVbox.addWidget(self.treeView)
+        _placeVbox.addWidget(self.authWidget)
 
         # Create the central splitter widget
-        self.splitter = QSplitter()
         self.splitter.setHandleWidth(1)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.listView)
-        self.splitter.addWidget(widget)
+        self.splitter.addWidget(_placeWidget)
         self.splitter.setSizes([160, 99999999])
         MainWindow.setCentralWidget(self.splitter)
 
@@ -112,17 +113,26 @@ class TasksMainWindow(mainwindowui.Ui_MainWindow):
 
         selectionModel = self.listView.selectionModel()
         selectionModel.currentChanged[QModelIndex, QModelIndex]\
+                .connect(self.controller.taskListModel.taskListChanged)
+        selectionModel.currentChanged[QModelIndex, QModelIndex]\
                 .connect(self.controller.taskModel.taskListChanged)
+        self.controller.taskListModel.setViewRow[int].connect(self.setTaskList)
+
+    def setTaskList(self, row):
+        index = self.controller.taskListModel.createIndex(row,0)
+        self.listView.setCurrentIndex(index)
+        self.controller.taskModel.taskListChanged(index, QModelIndex())
 
     def authRequired(self, url):
         self.setStatus("Authentication required.")
         self.authWidget.button.setText("Open Link in default browser")
-        text = """Authorization with google required. Open <a href="%s">this link</a> in your web
-                browser or press the button to open your web browser to continue.""" % url
+        text = """Authorization with google required. Open <a href="%s">this link</a>
+        in your web browser or press the button to open 
+        your web browser to continue.""" % url
+        
         self.authWidget.textEdit.setHtml(text)
         self.authWidget.show()
-        self.authWidget.setFixedHeight(80)
-        
+
         def openBrowser():
             QDesktopServices.openUrl(QUrl.fromEncoded(str(url)))
         self.authWidget.button.clicked.connect(openBrowser)

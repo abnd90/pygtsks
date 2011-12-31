@@ -7,6 +7,8 @@ from debug import debug
 class TaskListModel(QAbstractListModel):
 
     taskList = [] 
+    currentRow = 0
+    setViewRow = pyqtSignal(int)
 
     def __init__(self):
         super(TaskListModel, self).__init__()
@@ -59,13 +61,17 @@ class TaskListModel(QAbstractListModel):
         self.beginResetModel()
         self.readTaskLists()
         self.endResetModel()
-
+        self.setViewRow.emit(self.currentRow)
 
     def taskListForTlid(self, tlid):
         for tl in self.taskLists:
             if tl.tlid == tlid:
                 return tl
+            
+    def taskListChanged(self, curr, prev):
+        self.currentRow = curr.row()
 
+    
 class TaskModel(QAbstractTableModel):
     
     tasks = []
@@ -117,7 +123,7 @@ class TaskModel(QAbstractTableModel):
         task = self.tasks[row]
         if role == Qt.UserRole:
             return task
-        elif role == Qt.DisplayRole or role == Qt.EditRole:
+        elif role == Qt.EditRole:
             if col == 1:
                 return task.title
         elif role == Qt.SizeHintRole:
