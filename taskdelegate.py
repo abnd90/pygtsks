@@ -30,31 +30,39 @@ class TaskDelegate(QStyledItemDelegate):
         if index.column() == 1:
             textRect = option.rect.adjusted(0,6,0,0)
 
-            status = 'Due'
-            if task.due != '':
-                status += " on " + task.due.strftime(TIME_PRINT_FMT)
+            status = self.taskStatusStr(task) 
 
             if task.status == 'completed':
-                status = "Completed"
                 font = QFont()
                 font.setStrikeOut(True)
                 painter.setFont(font)
-                if task.completed != '':
-                    status += " on " + task.completed.strftime(TIME_PRINT_FMT)
                         
-            status += "."
             painter.drawText(textRect, Qt.AlignTop, task.title)
             painter.setFont(QFont())
             painter.drawText(textRect.adjusted(5,0,0,0), Qt.AlignBottom, status)
         
         painter.restore()
 
+    def taskStatusStr(self, task):
+        status = 'Due'
+        if task.due != '':
+            status += " on " + task.due.strftime(TIME_PRINT_FMT)
+
+        if task.status == 'completed':
+            status = "Completed"
+            
+            if task.completed != '':
+                status += " on " + task.completed.strftime(TIME_PRINT_FMT)
+                        
+        status += "."
+        return status
+
     def createEditor(self, parent, option, index):
         widget = TaskDialog(parent)
         ui = addtaskui.Ui_EditDialog()
         ui.setupUi(widget)
         widget.ui = ui
-
+        widget.setModal(True)
         return widget
 
     def setEditorData(self, editor, index):
@@ -62,6 +70,13 @@ class TaskDelegate(QStyledItemDelegate):
         editor.ui.task_name.setText(task.title)
         editor.ui.statusLabel.setText(task.status)
         editor.ui.textEdit.setText(task.notes)
+        editor.ui.statusLabel.setText(self.taskStatusStr(task))
+        editor.ui.dateEdit.setMinimumDate(QDate.currentDate())
+       
+        if task.due != '':
+            editor.ui.groupBox.setChecked(True)
+            date = QDate(task.due.year, task.due.month, task.due.day)
+            editor.ui.dateEdit.setDate(date)
 
     def setModelData(self, editor, model, index):
         if editor.result() == QDialog.Accepted:
