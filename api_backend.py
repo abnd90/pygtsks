@@ -8,6 +8,7 @@ from data_backend import Task, TaskList
 import httplib2
 import json
 from debug import debug
+from rfc3339 import parse_datetime
 
 FLOW = OAuth2WebServerFlow(
         client_id = '440903353654.apps.googleusercontent.com',
@@ -103,14 +104,16 @@ class GtaskApi(QObject):
                         res = res['items']
                         tasks = []
                         for task in res:
+                            if task['title'] == '':
+                                continue
                             t = Task(title=task['title'], tid=task['id'],\
                                     status=task['status'])
-                            if hasattr(task,'notes'):
+                            if 'notes' in task:
                                 t.notes = task['notes']
-                            if hasattr(task,'due'):
-                                t.due = task['due']
-                            if hasattr(task,'completed'):
-                                t.completed = task['completed']
+                            if 'due' in task:
+                                t.due = parse_datetime(task['due']) 
+                            if 'completed' in task:
+                                t.completed = parse_datetime(task['completed'])
                                 
                             tasks.append(t)
                         if cb:

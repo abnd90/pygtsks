@@ -1,5 +1,6 @@
 import sqlite3
 from debug import debug
+import datetime as dt
 
 DB_NAME = 'test'
 
@@ -105,21 +106,29 @@ class TaskList():
 
 
 class Task():
-    id=0
-    tasklist=0
-    tid=''
-    title=''
-    notes=''
-    updated=''
-    due='' 
-    hidden=0
-    status=''
-    deleted=0
-    position=''
-    completed=''
-    parent=''
+    """ 
+    Attributes:
 
-    def __init__(self, title, id=0, due='', tasklist=0, notes='', tid='',\
+        id
+        tasklist
+        tid
+        title
+        notes
+        updated
+        due
+        hidden
+        status
+        deleted
+        position
+        completed
+        parent
+
+    """
+
+    str_ftime = '%Y-%m-%d %H:%M:%S'
+
+    def __init__(self, title, id=0, due='' , tasklist=0,\
+            notes='', tid='',\
             completed='', status=''):
         self.id = id
         self.title = title
@@ -128,6 +137,7 @@ class Task():
         self.notes = notes
         self.tid = tid
         self.status = status
+        self.completed = completed
 
     def __str__(self):
         return str(self.id)+" "+self.title
@@ -150,7 +160,7 @@ class Task():
                 % (DB_TASKS_NAME , 'tid', 'title','tasklist', 'notes',\
                 'status', 'due','completed'), \
                 (task.tid, task.title, task.tasklist, task.notes,\
-                task.status, task.due,task.completed))
+                task.status, str(task.due),str(task.completed)))
 
         conn.commit()
         conn.close()
@@ -171,7 +181,12 @@ class Task():
         for row in res:
             task = Task(id=row[0], tid=row[2], \
                     title=row[3], tasklist=row[1], notes=row[4],\
-                    due=row[6], completed=row[11], status=row[8])
+                    status=row[8])
+
+            if row[11] != '':
+                task.completed = dt.datetime.strptime(row[11], Task.str_ftime )
+            if row[6] != '':
+                task.due = dt.datetime.strptime(row[6], Task.str_ftime)
             tasks.append(task)
         cur.close()
         conn.close()

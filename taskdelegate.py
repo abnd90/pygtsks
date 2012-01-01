@@ -3,6 +3,8 @@ from PyQt4.QtCore import *
 
 import addtaskui
 
+TIME_PRINT_FMT = "%c"
+
 class TaskDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
         super(TaskDelegate, self).paint(painter, option, index)
@@ -27,9 +29,23 @@ class TaskDelegate(QStyledItemDelegate):
         
         if index.column() == 1:
             textRect = option.rect.adjusted(0,6,0,0)
+
+            status = 'Due'
+            if task.due != '':
+                status += " on " + task.due.strftime(TIME_PRINT_FMT)
+
+            if task.status == 'completed':
+                status = "Completed"
+                font = QFont()
+                font.setStrikeOut(True)
+                painter.setFont(font)
+                if task.completed != '':
+                    status += " on " + task.completed.strftime(TIME_PRINT_FMT)
                         
+            status += "."
             painter.drawText(textRect, Qt.AlignTop, task.title)
-            painter.drawText(textRect.adjusted(5,0,0,0), Qt.AlignBottom, task.status)
+            painter.setFont(QFont())
+            painter.drawText(textRect.adjusted(5,0,0,0), Qt.AlignBottom, status)
         
         painter.restore()
 
